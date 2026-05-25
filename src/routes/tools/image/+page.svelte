@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { fileToBase64, base64ToBlob } from '$lib/utils/base64';
+	import { i18n, translations } from '$lib/i18n.svelte';
 
 	type Mode = 'to-base64' | 'to-image';
+
+	let t = $derived(translations[i18n.lang]);
 
 	let mode: Mode = $state('to-base64');
 	let dragging = $state(false);
@@ -17,7 +20,7 @@
 
 	async function handleFile(file: File) {
 		if (!file.type.startsWith('image/')) {
-			error = `Expected an image file, got "${file.type || 'unknown'}"`;
+			error = `${t.image.wrongType}: "${file.type || 'unknown'}"`;
 			return;
 		}
 		imageFile = file;
@@ -27,7 +30,7 @@
 		try {
 			b64Output = await fileToBase64(file);
 		} catch {
-			error = 'Failed to read file';
+			error = t.image.failedRead;
 		} finally {
 			loading = false;
 		}
@@ -47,7 +50,7 @@
 
 	function renderFromB64() {
 		if (!b64Input.trim()) {
-			error = 'Paste a Base64 string first';
+			error = t.file.noData;
 			return;
 		}
 		const clean = b64Input.trim().replace(/[\r\n\s]/g, '');
@@ -58,7 +61,7 @@
 
 	function downloadImage() {
 		if (!b64Input.trim()) {
-			error = 'No Base64 data to download';
+			error = t.file.noData;
 			return;
 		}
 		try {
@@ -70,7 +73,7 @@
 			a.click();
 			URL.revokeObjectURL(url);
 		} catch {
-			error = 'Invalid Base64 data';
+			error = t.file.invalidB64;
 		}
 	}
 
@@ -95,16 +98,16 @@
 </script>
 
 <svelte:head>
-	<title>Image ↔ Base64 — base64.og</title>
+	<title>{t.image.title} — base64.og</title>
 </svelte:head>
 
 <div class="max-w-4xl mx-auto px-6 py-10">
-	<h1 class="text-2xl font-bold text-zinc-100 mb-1">Image ↔ Base64</h1>
-	<p class="text-sm text-zinc-500 mb-8">Convert images to Base64 data URIs or render Base64 back to an image</p>
+	<h1 class="text-2xl font-bold text-zinc-100 mb-1">{t.image.title}</h1>
+	<p class="text-sm text-zinc-500 mb-8">{t.image.subtitle}</p>
 
 	<!-- Mode tabs -->
 	<div class="flex gap-1 mb-6 bg-zinc-900 p-1 rounded-lg w-fit border border-zinc-800">
-		{#each [['to-base64', 'Image → Base64'], ['to-image', 'Base64 → Image']] as [val, label]}
+		{#each [['to-base64', t.image.tabToBase64], ['to-image', t.image.tabToImage]] as [val, label]}
 			<button
 				onclick={() => {
 					mode = val as Mode;
@@ -120,7 +123,6 @@
 	</div>
 
 	{#if mode === 'to-base64'}
-		<!-- Drop zone -->
 		<div
 			role="button"
 			tabindex="0"
@@ -138,22 +140,22 @@
 		>
 			<input id="img-input" type="file" accept="image/*" class="hidden" onchange={onFileInput} />
 			{#if loading}
-				<p class="text-sm text-zinc-400">Processing...</p>
+				<p class="text-sm text-zinc-400">{t.common.processing}</p>
 			{:else if imageFile}
 				<p class="text-sm text-zinc-200 font-medium">{imageFile.name}</p>
 				<p class="text-xs text-zinc-500 mt-1">
 					{imageFile.type} · {(imageFile.size / 1024).toFixed(1)} KB
 				</p>
-				<p class="text-xs text-zinc-600 mt-2">Click to replace</p>
+				<p class="text-xs text-zinc-600 mt-2">{t.common.clickReplace}</p>
 			{:else}
-				<p class="text-sm text-zinc-400">Drop an image here or click to browse</p>
-				<p class="text-xs text-zinc-600 mt-1">PNG, JPG, GIF, WebP, SVG supported</p>
+				<p class="text-sm text-zinc-400">{t.image.dropZone}</p>
+				<p class="text-xs text-zinc-600 mt-1">{t.image.dropZoneSub}</p>
 			{/if}
 		</div>
 
 		{#if previewSrc && !loading}
 			<div class="mb-6">
-				<p class="text-[10px] text-zinc-600 uppercase tracking-widest mb-2">Preview</p>
+				<p class="text-[10px] text-zinc-600 uppercase tracking-widest mb-2">{t.common.preview}</p>
 				<img
 					src={previewSrc}
 					alt="Preview"
@@ -166,7 +168,7 @@
 			<div>
 				<div class="flex items-center justify-between mb-2">
 					<p class="text-sm font-medium text-zinc-300">
-						Base64 output
+						{t.image.base64Output}
 						<span class="ml-2 text-xs text-zinc-600 font-normal"
 							>{b64Output.length.toLocaleString()} chars</span
 						>
@@ -175,7 +177,7 @@
 						onclick={copy}
 						class="text-xs px-3 py-1 border border-zinc-700 hover:border-zinc-500 text-zinc-400 hover:text-zinc-100 rounded-md transition-colors"
 					>
-						{copied ? 'Copied!' : 'Copy'}
+						{copied ? t.common.copied : t.common.copy}
 					</button>
 				</div>
 				<textarea
@@ -186,9 +188,8 @@
 			</div>
 		{/if}
 	{:else}
-		<!-- MIME selector -->
 		<div class="mb-5">
-			<p class="text-[10px] text-zinc-600 uppercase tracking-widest mb-2">MIME type</p>
+			<p class="text-[10px] text-zinc-600 uppercase tracking-widest mb-2">{t.image.mimeType}</p>
 			<div class="flex gap-1.5 flex-wrap">
 				{#each mimeOptions as mime}
 					<button
@@ -204,11 +205,13 @@
 		</div>
 
 		<div class="mb-4">
-			<label for="img-b64-input" class="block text-sm font-medium text-zinc-300 mb-2">Base64 string</label>
+			<label for="img-b64-input" class="block text-sm font-medium text-zinc-300 mb-2">
+				{t.image.base64String}
+			</label>
 			<textarea
 				id="img-b64-input"
 				bind:value={b64Input}
-				placeholder="Paste Base64 encoded image data..."
+				placeholder={t.image.placeholderDecode}
 				class="w-full h-44 bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-sm text-zinc-100 font-mono placeholder:text-zinc-700 focus:outline-none focus:border-indigo-500 resize-y transition-colors"
 			></textarea>
 		</div>
@@ -218,14 +221,14 @@
 				onclick={renderFromB64}
 				class="px-5 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium rounded-lg transition-colors"
 			>
-				Render Image
+				{t.image.renderImage}
 			</button>
 			<button
 				onclick={downloadImage}
 				disabled={!b64Input.trim()}
 				class="px-4 py-2 border border-zinc-700 hover:border-zinc-500 text-zinc-300 hover:text-zinc-100 text-sm rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
 			>
-				Download
+				{t.common.download}
 			</button>
 		</div>
 
@@ -239,14 +242,14 @@
 
 		{#if previewSrc && !previewError}
 			<div>
-				<p class="text-[10px] text-zinc-600 uppercase tracking-widest mb-2">Preview</p>
+				<p class="text-[10px] text-zinc-600 uppercase tracking-widest mb-2">{t.common.preview}</p>
 				<img
 					src={previewSrc}
 					alt="Decoded"
 					class="max-w-full rounded-lg border border-zinc-800"
 					onerror={() => {
 						previewError = true;
-						error = 'Failed to render image — verify MIME type and Base64 data';
+						error = t.image.failedRender;
 						previewSrc = '';
 					}}
 				/>

@@ -1,44 +1,25 @@
 <script lang="ts">
-	const tools = [
-		{
-			href: '/tools/text',
-			label: 'Text Encode / Decode',
-			description: 'Encode any UTF-8 text to Base64 or decode Base64 back to readable text.'
-		},
-		{
-			href: '/tools/image',
-			label: 'Image ↔ Base64',
-			description: 'Convert PNG, JPG, GIF, WebP and SVG images to Base64 data URIs and back.'
-		},
-		{
-			href: '/tools/file',
-			label: 'File ↔ Base64',
-			description: 'Encode any file to Base64 or decode a Base64 string back to a downloadable file.'
-		},
-		{
-			href: '/tools/url',
-			label: 'URL-safe Base64',
-			description: 'RFC 4648 §5 encoding — safe for URLs, filenames and query params without percent-encoding.'
-		},
-		{
-			href: '/tools/validator',
-			label: 'Base64 Validator',
-			description: 'Check if a string is valid Base64, identify its variant, and inspect decoded byte size.'
-		}
-	];
+	import { i18n, translations } from '$lib/i18n.svelte';
+
+	let t = $derived(translations[i18n.lang]);
+
+	let tools = $derived([
+		{ href: '/tools/text', label: t.home.tools.text.label, description: t.home.tools.text.description },
+		{ href: '/tools/image', label: t.home.tools.image.label, description: t.home.tools.image.description },
+		{ href: '/tools/file', label: t.home.tools.file.label, description: t.home.tools.file.description },
+		{ href: '/tools/url', label: t.home.tools.url.label, description: t.home.tools.url.description },
+		{ href: '/tools/validator', label: t.home.tools.validator.label, description: t.home.tools.validator.description }
+	]);
 </script>
 
 <svelte:head>
-	<title>base64.og — Free Base64 Tools</title>
+	<title>base64.og — {t.home.title}</title>
 </svelte:head>
 
 <div class="max-w-3xl mx-auto px-6 py-16">
 	<div class="mb-12">
-		<h1 class="text-3xl font-bold text-zinc-100 mb-3">Base64 Tools</h1>
-		<p class="text-zinc-400 text-lg leading-relaxed">
-			Fast, free, and open-source. Encode and decode Base64 for text, images, and files — entirely
-			in your browser. Nothing leaves your machine.
-		</p>
+		<h1 class="text-3xl font-bold text-zinc-100 mb-3">{t.home.title}</h1>
+		<p class="text-zinc-400 text-lg leading-relaxed">{t.home.description}</p>
 	</div>
 
 	<div class="grid gap-3 sm:grid-cols-2">
@@ -59,9 +40,9 @@
 
 	<div class="mt-12 p-4 rounded-xl border border-zinc-800 bg-zinc-900/50">
 		<p class="text-xs text-zinc-500 leading-relaxed">
-			<span class="text-zinc-400 font-medium">Embed any tool</span> in your own app by adding
-			<code class="bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-300 font-mono">?embed=true</code>
-			to the URL — the nav disappears and the tool renders standalone, ready for iframe integration.
+			<span class="text-zinc-400 font-medium">{t.home.embedHint}</span>
+			<code class="bg-zinc-800 px-1.5 py-0.5 rounded text-zinc-300 font-mono mx-1">?embed=true</code>
+			{t.home.embedHint2}
 		</p>
 	</div>
 </div>

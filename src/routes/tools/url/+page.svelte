@@ -1,7 +1,10 @@
 <script lang="ts">
 	import { encodeText, decodeText, toUrlSafe, fromUrlSafe } from '$lib/utils/base64';
+	import { i18n, translations } from '$lib/i18n.svelte';
 
 	type Mode = 'encode' | 'decode';
+
+	let t = $derived(translations[i18n.lang]);
 
 	let mode: Mode = $state('encode');
 	let input = $state('');
@@ -46,24 +49,28 @@
 </script>
 
 <svelte:head>
-	<title>URL-safe Base64 — base64.og</title>
+	<title>{t.url.title} — base64.og</title>
 </svelte:head>
 
 <div class="max-w-4xl mx-auto px-6 py-10">
-	<h1 class="text-2xl font-bold text-zinc-100 mb-1">URL-safe Base64</h1>
+	<h1 class="text-2xl font-bold text-zinc-100 mb-1">{t.url.title}</h1>
 	<p class="text-sm text-zinc-500 mb-1">
-		RFC 4648 §5 — uses <code class="bg-zinc-800 px-1 rounded text-zinc-300 font-mono">-</code> and
-		<code class="bg-zinc-800 px-1 rounded text-zinc-300 font-mono">_</code> instead of
-		<code class="bg-zinc-800 px-1 rounded text-zinc-300 font-mono">+</code> and
-		<code class="bg-zinc-800 px-1 rounded text-zinc-300 font-mono">/</code>, no padding by default
+		{t.url.subtitle}
+		<code class="bg-zinc-800 px-1 rounded text-zinc-300 font-mono">-</code>
+		{t.url.subtitleMid}
+		<code class="bg-zinc-800 px-1 rounded text-zinc-300 font-mono">_</code>
+		{t.url.subtitleEnd}
+		<code class="bg-zinc-800 px-1 rounded text-zinc-300 font-mono">+</code>
+		{t.url.subtitleEnd2}
+		<code class="bg-zinc-800 px-1 rounded text-zinc-300 font-mono">/</code>
+		—
+		{t.url.subtitleEnd3}
 	</p>
-	<p class="text-xs text-zinc-700 mb-8">
-		Safe for URLs, filenames, JWT tokens, and query parameters without percent-encoding
-	</p>
+	<p class="text-xs text-zinc-700 mb-8">{t.url.description}</p>
 
 	<!-- Mode tabs -->
 	<div class="flex gap-1 mb-6 bg-zinc-900 p-1 rounded-lg w-fit border border-zinc-800">
-		{#each [['encode', 'Encode'], ['decode', 'Decode']] as [val, label]}
+		{#each [['encode', t.common.encode], ['decode', t.common.decode]] as [val, label]}
 			<button
 				onclick={() => {
 					mode = val as Mode;
@@ -84,7 +91,8 @@
 		<label class="flex items-center gap-2 cursor-pointer mb-5">
 			<input type="checkbox" bind:checked={includePadding} class="accent-indigo-500 w-4 h-4" />
 			<span class="text-sm text-zinc-400">
-				Include padding (<code class="bg-zinc-800 px-1 rounded text-zinc-300 font-mono">=</code>)
+				{t.url.includePadding}
+				(<code class="bg-zinc-800 px-1 rounded text-zinc-300 font-mono">=</code>)
 			</span>
 		</label>
 	{/if}
@@ -92,7 +100,7 @@
 	<div class="mb-4">
 		<div class="flex items-center justify-between mb-2">
 			<label for="url-input" class="text-sm font-medium text-zinc-300">
-				{mode === 'encode' ? 'Text to encode' : 'URL-safe Base64 to decode'}
+				{mode === 'encode' ? t.url.inputEncode : t.url.inputDecode}
 			</label>
 			<button
 				onclick={() => {
@@ -102,16 +110,18 @@
 				}}
 				class="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
 			>
-				Clear
+				{t.common.clear}
 			</button>
 		</div>
 		<textarea
 			id="url-input"
 			bind:value={input}
-			placeholder={mode === 'encode' ? 'Enter text...' : 'Paste URL-safe Base64 string...'}
+			placeholder={mode === 'encode' ? t.url.placeholderEncode : t.url.placeholderDecode}
 			class="w-full h-44 bg-zinc-900 border border-zinc-700 rounded-xl p-4 text-sm text-zinc-100 font-mono placeholder:text-zinc-700 focus:outline-none focus:border-indigo-500 resize-y transition-colors"
 		></textarea>
-		<p class="text-[11px] text-zinc-700 mt-1.5">{input.length.toLocaleString()} characters</p>
+		<p class="text-[11px] text-zinc-700 mt-1.5">
+			{input.length.toLocaleString()} {t.common.characters}
+		</p>
 	</div>
 
 	{#if error}
@@ -125,12 +135,12 @@
 	{#if output}
 		<div>
 			<div class="flex items-center justify-between mb-2">
-				<p class="text-sm font-medium text-zinc-300">Result</p>
+				<p class="text-sm font-medium text-zinc-300">{t.common.result}</p>
 				<button
 					onclick={copy}
 					class="text-xs px-3 py-1 border border-zinc-700 hover:border-zinc-500 text-zinc-400 hover:text-zinc-100 rounded-md transition-colors"
 				>
-					{copied ? 'Copied!' : 'Copy'}
+					{copied ? t.common.copied : t.common.copy}
 				</button>
 			</div>
 			<textarea
@@ -138,7 +148,9 @@
 				value={output}
 				class="w-full h-44 bg-zinc-900/40 border border-zinc-800 rounded-xl p-4 text-sm text-zinc-100 font-mono focus:outline-none resize-y"
 			></textarea>
-			<p class="text-[11px] text-zinc-700 mt-1.5">{output.length.toLocaleString()} characters</p>
+			<p class="text-[11px] text-zinc-700 mt-1.5">
+				{output.length.toLocaleString()} {t.common.characters}
+			</p>
 		</div>
 	{/if}
 </div>

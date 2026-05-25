@@ -1,23 +1,29 @@
 <script lang="ts">
 	import './layout.css';
 	import { page } from '$app/state';
+	import { i18n, translations } from '$lib/i18n.svelte';
+	import LangToggle from '$lib/components/LangToggle.svelte';
 
 	let { children } = $props();
 
-	const navItems = [
-		{ href: '/tools/text', label: 'Text Encode / Decode' },
-		{ href: '/tools/image', label: 'Image ↔ Base64' },
-		{ href: '/tools/file', label: 'File ↔ Base64' },
-		{ href: '/tools/url', label: 'URL-safe Base64' },
-		{ href: '/tools/validator', label: 'Validator' }
-	];
-
+	let t = $derived(translations[i18n.lang]);
 	let isEmbed = $derived(page.url.searchParams.get('embed') === 'true');
 	let currentPath = $derived(page.url.pathname);
+
+	let navItems = $derived([
+		{ href: '/tools/text', label: t.nav.text },
+		{ href: '/tools/image', label: t.nav.image },
+		{ href: '/tools/file', label: t.nav.file },
+		{ href: '/tools/url', label: t.nav.url },
+		{ href: '/tools/validator', label: t.nav.validator }
+	]);
 </script>
 
 <svelte:head>
-	<meta name="description" content="Free online Base64 encoding and decoding tools — text, images, files, URL-safe. All processing in your browser." />
+	<meta
+		name="description"
+		content="Free online Base64 encoding and decoding tools — text, images, files, URL-safe. All processing in your browser."
+	/>
 </svelte:head>
 
 {#if isEmbed}
@@ -37,7 +43,7 @@
 
 			<nav class="flex-1 px-2 pb-4 overflow-y-auto">
 				<p class="px-2 pt-1 pb-2 text-[10px] font-semibold text-zinc-600 uppercase tracking-widest">
-					Tools
+					{t.nav.tools}
 				</p>
 				<ul class="space-y-0.5">
 					{#each navItems as item}
@@ -57,8 +63,9 @@
 				</ul>
 			</nav>
 
-			<div class="px-4 py-3 border-t border-zinc-800">
-				<p class="text-[10px] text-zinc-600">100% client-side · No data sent</p>
+			<div class="px-4 py-3 border-t border-zinc-800 flex items-center justify-between gap-2">
+				<p class="text-[10px] text-zinc-600 leading-tight">{t.nav.clientSide}</p>
+				<LangToggle />
 			</div>
 		</aside>
 
